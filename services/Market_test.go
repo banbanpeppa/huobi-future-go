@@ -1,11 +1,12 @@
 package services
 
 import (
-	"Futures-Go-demo/config"
-	"Futures-Go-demo/websocket"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/banbanpeppa/huobi-future-go/config"
+	"github.com/banbanpeppa/huobi-future-go/websocket"
 )
 
 //测试获取合约信息接口

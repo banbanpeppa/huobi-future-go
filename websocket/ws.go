@@ -1,13 +1,14 @@
 package websocket
 
 import (
-	"Futures-Go-demo/config"
 	"bytes"
 	"compress/gzip"
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"log"
+
+	"github.com/banbanpeppa/huobi-future-go/config"
 
 	"golang.org/x/net/websocket"
 )
@@ -78,7 +79,6 @@ func WSRun() {
 	message := []byte("{\"Sub\":\"market.BTC_CW.kline.1min\"}")
 	send(message, ws)
 
-
 	//订阅websocket Market Detail 数据
 	/*
 	  "market.$symbol.detail"
@@ -95,17 +95,15 @@ func WSRun() {
 	message = []byte("{\"Sub\":\"market.BTC_CW.trade.detail\"}")
 	send(message, ws)
 
-
 	//订阅websocket Market Depth 数据
 	/*
-			  "market.$symbol.depth.$type"
-			 symbol	true	string	交易对		如"BTC_CW"表示BTC当周合约，"BTC_NW"表示BTC次周合约，"BTC_CQ"表示BTC季度合约.
-		     type	true	string	Depth 类型	(150档数据)	step0, step1, step2, step3, step4, step5（合并深度1-5）；step0时，不合并深度
-	                                            (20档数据)  step6, step7, step8, step9, step10, step11（合并深度7-11）；step6时，不合并深度
+				  "market.$symbol.depth.$type"
+				 symbol	true	string	交易对		如"BTC_CW"表示BTC当周合约，"BTC_NW"表示BTC次周合约，"BTC_CQ"表示BTC季度合约.
+			     type	true	string	Depth 类型	(150档数据)	step0, step1, step2, step3, step4, step5（合并深度1-5）；step0时，不合并深度
+		                                            (20档数据)  step6, step7, step8, step9, step10, step11（合并深度7-11）；step6时，不合并深度
 	*/
 	message = []byte("{\"Sub\":\"market.BTC_CW.depth.step0\"}")
 	send(message, ws)
-
 
 	//请求websocket KLine 数据
 	/*
@@ -129,7 +127,6 @@ func WSRun() {
 	message = []byte("{\"req\":\"market.BTC_CQ.kline.1day\",\"from\":1544170607,\"to\":1544602608}")
 	send(message, ws)
 
-
 	//请求websocket Trade Detail 数据
 	/*
 	  "market.$symbol.trade.detail"
@@ -137,8 +134,6 @@ func WSRun() {
 	*/
 	message = []byte("{\"req\":\"market.BTC_CW.trade.detail\"}")
 	send(message, ws)
-
-
 
 	//===============================================================================
 

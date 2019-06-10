@@ -1,10 +1,11 @@
 package main
 
 import (
-	"Futures-Go-demo/services"
-	"Futures-Go-demo/websocket"
 	"fmt"
 	"time"
+
+	"github.com/banbanpeppa/huobi-future-go/services"
+	"github.com/banbanpeppa/huobi-future-go/websocket"
 )
 
 func main() {
@@ -157,11 +158,7 @@ func main() {
 	//websocket.WSRun()  //无需本地IP地址，直接运行
 	//websocket.WSRunWithIP(config.Local_IP) //配置文件须填写本地IP地址，WS运行太久，外部原因可能断开，支持自动重连
 
-
-
 	//WebSocket 订单推送 API
 	websocket.WSWithOrder()
-
-
 
 }

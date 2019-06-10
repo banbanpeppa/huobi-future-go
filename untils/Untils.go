@@ -1,7 +1,6 @@
 package untils
 
 import (
-	"Futures-Go-demo/config"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -13,6 +12,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/banbanpeppa/huobi-future-go/config"
 )
 
 // Http Get请求基础函数, 通过封装Go语言Http请求, 支持火币网REST API的HTTP Get请求
@@ -155,14 +156,12 @@ func ApiKeyGet(mapParams map[string]string, strRequestPath string) string {
 	return HttpGetRequest(strUrl, MapValueEncodeURI(mapParams))
 }
 
-
 // 进行签名后的HTTP GET请求, 参考官方Python Demo写的
 // mapParams: map类型的请求参数, key:value
 // strRequest: API路由路径
 // return: 请求结果
 func ApiKeyGetOrder(mapParams map[string]string, strRequestPath string) map[string]string {
 	strMethod := "GET"
-
 
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 	//设置所在的时区
@@ -172,23 +171,19 @@ func ApiKeyGetOrder(mapParams map[string]string, strRequestPath string) map[stri
 	//temp := time.Date(t.Year(), t.Month(), t.Day(), t.Hour()-timezone, t.Minute(), t.Second(), t.Nanosecond(), time.Local)
 	//timestamp := temp.Format("2006-01-02T15:04:05")
 
-
 	mapParams["AccessKeyId"] = config.ACCESS_KEY
 	mapParams["SignatureMethod"] = "HmacSHA256"
 	mapParams["SignatureVersion"] = "2"
 	mapParams["Timestamp"] = timestamp
 
-
 	hostName := config.HOST_NAME
 
 	mapParams["Signature"] = CreateSign(mapParams, strMethod, hostName, strRequestPath, config.SECRET_KEY)
 
-
-
 	mapParams["op"] = "auth"
 	mapParams["type"] = "api"
 
-	return  mapParams
+	return mapParams
 
 }
 func ApiKeyPostBatchorder(mapParams map[string]interface{}, strRequestPath string) string {
@@ -270,13 +265,13 @@ func ApiKeyPostOrder(mapParams map[string]string, strRequestPath string) map[str
 	strMethod := "POST"
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 	/*
-	 "op": "auth",
-  "type": "api",
+			 "op": "auth",
+		  "type": "api",
 
 
 
 
-	 */
+	*/
 
 	mapParams2Sign := make(map[string]string)
 	mapParams2Sign["AccessKeyId"] = config.ACCESS_KEY
@@ -300,10 +295,10 @@ func ApiKeyPostOrder(mapParams map[string]string, strRequestPath string) map[str
 	}
 
 	//strUrl := config.TRADE_URL + strRequestPath + "?" + Map2UrlQuery(MapValueEncodeURI(mapParams2Sign))
-    return  mapParams2Sign
-
+	return mapParams2Sign
 
 }
+
 // 构造签名
 // mapParams: 送进来参与签名的参数, Map类型
 // strMethod: 请求的方法 GET, POST......

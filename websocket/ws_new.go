@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"Futures-Go-demo/config"
 	"bytes"
 	"compress/gzip"
 	"encoding/binary" //"flag"
@@ -11,6 +10,8 @@ import (
 	"math/rand"
 	"net"
 	"time"
+
+	"github.com/banbanpeppa/huobi-future-go/config"
 
 	"github.com/gorilla/websocket"
 	"github.com/spf13/cast"
