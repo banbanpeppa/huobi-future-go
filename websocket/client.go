@@ -23,14 +23,15 @@ type Message struct {
 }
 
 type Client struct {
-	Name   string
-	Params *ClientParameters
-	Ws     *websocket.Conn
+	Name     string
+	Params   *ClientParameters
+	Ws       *websocket.Conn
+	listener chan []byte
 }
 
 // ws-client的监控对象
 type Moniter struct {
-	clientNum  int      //连接到huobi的ws-client数目
+	clientNum  int      //huobiws-client数目
 	addChan    chan int // 当添加ws-client的时候，使用管道对象管理
 	subChan    chan int // 当关闭了ws-client之后，subChan减1
 	lastUseSec int
@@ -41,10 +42,6 @@ var (
 	clientNameNum int
 	Msg           *Message
 )
-
-func GetMsg() *Message {
-	return Msg
-}
 
 func initMoniter() {
 	mon = &Moniter{}
@@ -70,34 +67,30 @@ func SubClientNum() {
 	mon.subChan <- 1
 }
 
-func client(params *ClientParameters, name string) *Client {
-	return &Client{Name: name, Params: params}
-}
-
 func NowSec() int {
 	return int(time.Now().UnixNano() / 1000000000)
 }
 
 func NewHuobiWSClient(params *ClientParameters) *Client {
 	clientNameNum++
-	c := client(params, cast.ToString(clientNameNum))
-	return c
+	return &Client{Name: cast.ToString(clientNameNum), Params: params, listener: make(chan []byte)}
 }
 
 func (cli *Client) Sub(messages []string) {
 	initMoniter()
 	go cli.sub(messages)
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	cli.reCreateClient()
-	for {
-		time.Sleep(10 * time.Second)
-	}
+}
+
+func (cli *Client) Listen() <-chan []byte {
+	return cli.listener
 }
 
 func (cli *Client) reCreateClient() {
 	go func() {
-		time.Sleep(time.Second * 100)
-		checkTicker := time.NewTicker(time.Second * 20)
+		time.Sleep(time.Second * 20)
+		checkTicker := time.NewTicker(time.Second * 10)
 		for {
 			select {
 			case <-checkTicker.C:
@@ -165,7 +158,7 @@ func (cli *Client) sub(messages []string) {
 		_, zipmsg, err := c.ReadMessage()
 		if err != nil {
 			log.Println("Read Error : ", err, cli.Name)
-			c.Close()
+			defer c.Close()
 			return
 		}
 
@@ -173,15 +166,7 @@ func (cli *Client) sub(messages []string) {
 		if err != nil {
 			log.Println("gzip Error : ", err)
 		}
-		go func() {
-			Msg = &Message{}
-			Msg.Data = make(chan string)
-			testm := string(msg)
-			// log.Println(testm)
-			Msg.Data <- string(testm)
-		}()
 
-		// log.Println(string(msg[:]))
-
+		cli.listener <- msg
 	}
 }
