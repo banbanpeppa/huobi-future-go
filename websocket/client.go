@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -13,20 +14,43 @@ import (
 	"github.com/spf13/cast"
 )
 
-type Message struct {
-	Ts      int         `json:"ts"`
-	Status  string      `json:"status"`
-	ErrCode string      `json:"err-code"`
-	ErrMsg  string      `json:"err-msg"`
-	Ping    int         `json:"ping"`
-	Data    chan string `json:"data"`
+/** 订阅websocket的请求格式
+{
+	"sub": "market.$symbol.kline.$period",
+	"id": "id generate by client"
+}
+*/
+type Request struct {
+	Id  string `json:"id"`
+	Req string `json:"req"`
+	Sub string `json:"sub"`
+}
+
+type Data struct {
+	Amount    int     `json:"amount"`
+	Ts        int     `json:"ts"`
+	Id        int     `json:"id"`
+	Price     float32 `json:"price"`
+	Direction string  `json:"direction"`
+}
+
+type Tick struct {
+	Id   int    `json:"id"`
+	Ts   int    `json:"ts"`
+	Data []Data `json:"data"`
+}
+
+type TradeDetail struct {
+	Ts   int    `json:"ts"`
+	Ch   string `json:"ch"`
+	Tick Tick   `json:"tick"`
 }
 
 type Client struct {
 	Name     string
 	Params   *ClientParameters
 	Ws       *websocket.Conn
-	listener chan []byte
+	listener chan interface{}
 }
 
 // ws-client的监控对象
@@ -40,7 +64,6 @@ type Moniter struct {
 var (
 	mon           *Moniter
 	clientNameNum int
-	Msg           *Message
 )
 
 func initMoniter() {
@@ -73,17 +96,17 @@ func NowSec() int {
 
 func NewHuobiWSClient(params *ClientParameters) *Client {
 	clientNameNum++
-	return &Client{Name: cast.ToString(clientNameNum), Params: params, listener: make(chan []byte)}
+	return &Client{Name: cast.ToString(clientNameNum), Params: params, listener: make(chan interface{})}
 }
 
-func (cli *Client) Sub(messages []string) {
+func (cli *Client) Subscribe(requests []Request) {
 	initMoniter()
-	go cli.sub(messages)
-	time.Sleep(20 * time.Millisecond)
-	cli.reCreateClient()
+	go cli.sub(requests)
+	// time.Sleep(20 * time.Millisecond)
+	// cli.reCreateClient()
 }
 
-func (cli *Client) Listen() <-chan []byte {
+func (cli *Client) Listen() <-chan interface{} {
 	return cli.listener
 }
 
@@ -102,7 +125,7 @@ func (cli *Client) reCreateClient() {
 	}()
 }
 
-func (cli *Client) sub(messages []string) {
+func (cli *Client) sub(reqs []Request) {
 	AddClientNum()
 	dialer := websocket.DefaultDialer
 	dialer.NetDial = func(network, addr string) (net.Conn, error) {
@@ -124,14 +147,17 @@ func (cli *Client) sub(messages []string) {
 		SubClientNum()
 		return
 	}
-	log.Println(c.LocalAddr().String())
 
 	defer func() {
 		c.Close()
 		SubClientNum()
 	}()
 
-	for _, message := range messages {
+	for _, request := range reqs {
+		message, err := json.Marshal(request)
+		if err != nil {
+			log.Println("json marshal err :", err)
+		}
 		messgeByte := []byte(message)
 		err = c.WriteMessage(websocket.TextMessage, messgeByte)
 		if err != nil {
@@ -167,6 +193,10 @@ func (cli *Client) sub(messages []string) {
 			log.Println("gzip Error : ", err)
 		}
 
-		cli.listener <- msg
+		cli.handleMessage(msg)
 	}
+}
+
+func (cli *Client) handleMessage(msg []byte) {
+	cli.listener <- msg
 }

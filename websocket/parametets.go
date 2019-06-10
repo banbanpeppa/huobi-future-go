@@ -7,7 +7,7 @@ type ClientParameters struct {
 
 func NewDefaultParameters() *ClientParameters {
 	return &ClientParameters{
-		URL:     WS_URL,
+		URL:     WS_FUTURE_URL,
 		LocalIP: Local_IP,
 	}
 }
