@@ -27,10 +27,10 @@ type Request struct {
 }
 
 type Data struct {
-	Amount    int     `json:"amount"`
-	Ts        int     `json:"ts"`
-	Id        int     `json:"id"`
-	Price     float32 `json:"price"`
+	// Amount int `json:"amount"`
+	Ts int `json:"ts"`
+	// Id        uint64  `json:"id"`
+	Price     float64 `json:"price"`
 	Direction string  `json:"direction"`
 }
 
