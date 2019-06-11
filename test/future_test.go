@@ -51,5 +51,5 @@ func TestTrimFix(t *testing.T) {
 
 	str := "market.BTC_CQ.trade.detail"
 	ticker := strings.TrimSuffix(str[7:], ".trade.detail") //btc
-	fmt.Println(ticker[0 : len(ticker)-3])
+	fmt.Println(strings.ToLower(ticker[len(ticker)-2 : len(ticker)]))
 }
